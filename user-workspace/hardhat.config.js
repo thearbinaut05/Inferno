@@ -1,4 +1,9 @@
 require("@nomicfoundation/hardhat-toolbox");
+require("@nomicfoundation/hardhat-chai-matchers");
+require("@nomicfoundation/hardhat-ethers");
+require("@nomicfoundation/hardhat-ignition");
+require("hardhat-gas-reporter");
+require("solidity-coverage");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -19,6 +24,10 @@ module.exports = {
       url: "http://127.0.0.1:8545",
       chainId: 1337
     }
+  },
+  gasReporter: {
+    enabled: true,
+    currency: 'USD',
   },
   paths: {
     sources: "./contracts",
