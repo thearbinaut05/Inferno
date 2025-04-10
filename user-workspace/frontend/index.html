@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeFi Flash Swap Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -21,9 +22,15 @@
                     <div class="flex-shrink-0 flex items-center">
                         <h1 class="text-xl font-bold text-gray-800">Flash Swap Dashboard</h1>
                     </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="index.html" class="text-blue-500 px-3 py-2 rounded-md">Dashboard</a>
+                        <a href="swap.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Swap</a>
+                        <a href="settings.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Settings</a>
+                        <a href="history.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">History</a>
+                    </div>
                 </div>
                 <div class="flex items-center">
-                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
+                    <button id="connectWallet" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors">
                         Connect Wallet
                     </button>
                 </div>
@@ -36,15 +43,15 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-2">Total Value Locked</h3>
-                <p class="text-3xl font-bold text-blue-600">$0.00</p>
+                <p id="tvl" class="text-3xl font-bold text-blue-600">$0.00</p>
             </div>
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-2">24h Volume</h3>
-                <p class="text-3xl font-bold text-green-600">$0.00</p>
+                <p id="volume" class="text-3xl font-bold text-green-600">$0.00</p>
             </div>
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-2">Active Positions</h3>
-                <p class="text-3xl font-bold text-purple-600">0</p>
+                <p id="positions" class="text-3xl font-bold text-purple-600">0</p>
             </div>
         </div>
 
@@ -53,19 +60,56 @@
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-lg font-medium text-gray-900">Recent Transactions</h2>
             </div>
-            <div class="p-6">
+            <div id="transactionList" class="p-6">
                 <div class="text-center text-gray-500">
                     <i class="fas fa-history text-4xl mb-2"></i>
-                    <p>No transactions yet</p>
+                    <p>Connect wallet to view transactions</p>
                 </div>
             </div>
         </div>
     </main>
 
+    <script src="js/wallet.js"></script>
     <script>
-        // Add your JavaScript code here
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize your web3 connection and contract interactions here
+            const connectButton = document.getElementById('connectWallet');
+            connectButton.addEventListener('click', connectWallet);
+
+            // Listen for wallet connection events
+            window.addEventListener('walletConnected', async function(e) {
+                const account = e.detail.account;
+                console.log('Wallet connected:', account);
+                
+                // Initialize contract interactions here
+                try {
+                    const provider = window.userWallet.provider;
+                    // Update transaction list
+                    document.getElementById('transactionList').innerHTML = `
+                        <div class="text-center text-gray-500">
+                            <i class="fas fa-sync fa-spin text-4xl mb-2"></i>
+                            <p>Loading transactions...</p>
+                        </div>
+                    `;
+                    
+                    // Add your contract initialization and data fetching code here
+                    
+                } catch (error) {
+                    console.error('Error initializing contracts:', error);
+                }
+            });
+
+            // Handle wallet disconnection
+            window.addEventListener('walletDisconnected', function() {
+                document.getElementById('tvl').textContent = '$0.00';
+                document.getElementById('volume').textContent = '$0.00';
+                document.getElementById('positions').textContent = '0';
+                document.getElementById('transactionList').innerHTML = `
+                    <div class="text-center text-gray-500">
+                        <i class="fas fa-history text-4xl mb-2"></i>
+                        <p>Connect wallet to view transactions</p>
+                    </div>
+                `;
+            });
         });
     </script>
 </body>

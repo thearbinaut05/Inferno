@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Execute Flash Swap</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -25,14 +26,28 @@
                         <a href="index.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Dashboard</a>
                         <a href="swap.html" class="text-blue-500 px-3 py-2 rounded-md">Swap</a>
                         <a href="settings.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Settings</a>
+                        <a href="history.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">History</a>
                     </div>
+                </div>
+                <div class="flex items-center">
+                    <button id="connectWallet" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors">
+                        Connect Wallet
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
 
     <main class="max-w-2xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="bg-white rounded-lg shadow p-6">
+        <div id="walletPrompt" class="bg-white rounded-lg shadow p-6 text-center hidden">
+            <i class="fas fa-wallet text-4xl text-gray-400 mb-4"></i>
+            <p class="text-gray-600">Please connect your wallet to execute flash swaps</p>
+            <button onclick="connectWallet()" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition-colors">
+                Connect Wallet
+            </button>
+        </div>
+
+        <div id="swapInterface" class="bg-white rounded-lg shadow p-6">
             <h2 class="text-2xl font-bold text-gray-900 mb-6">Execute Flash Swap</h2>
             
             <form id="swapForm" class="space-y-6">
@@ -41,10 +56,11 @@
                     <label class="block text-sm font-medium text-gray-700">Token In</label>
                     <div class="mt-1 relative rounded-md shadow-sm">
                         <input type="text" 
+                               id="tokenIn"
                                class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-4 pr-12 sm:text-sm border-gray-300 rounded-md" 
                                placeholder="Token Address">
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                            <i class="fas fa-search text-gray-400"></i>
+                            <i class="fas fa-search text-gray-400 cursor-pointer" onclick="searchToken('in')"></i>
                         </div>
                     </div>
                 </div>
@@ -54,13 +70,15 @@
                     <label class="block text-sm font-medium text-gray-700">Amount In</label>
                     <div class="mt-1">
                         <input type="number" 
+                               id="amountIn"
                                class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-4 pr-12 sm:text-sm border-gray-300 rounded-md" 
-                               placeholder="0.0">
+                               placeholder="0.0"
+                               onchange="calculateOutput()">
                     </div>
                 </div>
 
                 <div class="flex justify-center">
-                    <button type="button" class="bg-gray-200 rounded-full p-2">
+                    <button type="button" class="bg-gray-200 rounded-full p-2" onclick="swapTokens()">
                         <i class="fas fa-arrow-down text-gray-600"></i>
                     </button>
                 </div>
@@ -70,10 +88,11 @@
                     <label class="block text-sm font-medium text-gray-700">Token Out</label>
                     <div class="mt-1 relative rounded-md shadow-sm">
                         <input type="text" 
+                               id="tokenOut"
                                class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-4 pr-12 sm:text-sm border-gray-300 rounded-md" 
                                placeholder="Token Address">
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                            <i class="fas fa-search text-gray-400"></i>
+                            <i class="fas fa-search text-gray-400 cursor-pointer" onclick="searchToken('out')"></i>
                         </div>
                     </div>
                 </div>
@@ -83,6 +102,7 @@
                     <label class="block text-sm font-medium text-gray-700">Amount Out (Estimated)</label>
                     <div class="mt-1">
                         <input type="number" 
+                               id="amountOut"
                                class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-4 pr-12 sm:text-sm border-gray-300 rounded-md" 
                                placeholder="0.0" 
                                readonly>
@@ -107,12 +127,12 @@
             <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div class="sm:flex sm:items-start">
-                        <div class="mt-3 text-center sm:mt-0 sm:text-left">
+                        <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
                             <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
                                 Transaction Status
                             </h3>
                             <div class="mt-2">
-                                <p class="text-sm text-gray-500">
+                                <p id="modalStatus" class="text-sm text-gray-500">
                                     Processing your flash swap transaction...
                                 </p>
                             </div>
@@ -123,16 +143,106 @@
         </div>
     </div>
 
+    <script src="js/wallet.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const connectButton = document.getElementById('connectWallet');
+            const walletPrompt = document.getElementById('walletPrompt');
+            const swapInterface = document.getElementById('swapInterface');
             const swapForm = document.getElementById('swapForm');
             
-            swapForm.addEventListener('submit', function(e) {
+            connectButton.addEventListener('click', connectWallet);
+            
+            // Check if wallet is already connected
+            if (!window.userWallet) {
+                walletPrompt.classList.remove('hidden');
+                swapInterface.classList.add('hidden');
+            }
+
+            window.addEventListener('walletConnected', function(e) {
+                walletPrompt.classList.add('hidden');
+                swapInterface.classList.remove('hidden');
+            });
+
+            window.addEventListener('walletDisconnected', function() {
+                walletPrompt.classList.remove('hidden');
+                swapInterface.classList.add('hidden');
+            });
+
+            swapForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                // Add your swap execution logic here
-                document.getElementById('statusModal').classList.remove('hidden');
+                if (!window.userWallet) {
+                    alert('Please connect your wallet first');
+                    return;
+                }
+
+                const tokenIn = document.getElementById('tokenIn').value;
+                const tokenOut = document.getElementById('tokenOut').value;
+                const amountIn = document.getElementById('amountIn').value;
+                const amountOut = document.getElementById('amountOut').value;
+
+                if (!tokenIn || !tokenOut || !amountIn || !amountOut) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                try {
+                    document.getElementById('statusModal').classList.remove('hidden');
+                    
+                    // Execute flash swap
+                    const contract = new ethers.Contract(
+                        'YOUR_CONTRACT_ADDRESS',
+                        ['function flashSwap(address,address,uint256,uint256)'],
+                        window.userWallet.signer
+                    );
+
+                    const tx = await contract.flashSwap(
+                        tokenIn,
+                        tokenOut,
+                        ethers.utils.parseUnits(amountIn, 18),
+                        ethers.utils.parseUnits(amountOut, 18)
+                    );
+
+                    document.getElementById('modalStatus').textContent = 'Transaction submitted. Waiting for confirmation...';
+                    
+                    await tx.wait();
+                    
+                    document.getElementById('modalStatus').textContent = 'Transaction confirmed!';
+                    setTimeout(() => {
+                        document.getElementById('statusModal').classList.add('hidden');
+                        swapForm.reset();
+                    }, 2000);
+
+                } catch (error) {
+                    console.error('Error executing flash swap:', error);
+                    document.getElementById('modalStatus').textContent = 'Transaction failed: ' + error.message;
+                    setTimeout(() => {
+                        document.getElementById('statusModal').classList.add('hidden');
+                    }, 3000);
+                }
             });
         });
+
+        function calculateOutput() {
+            // Add your price calculation logic here
+            const amountIn = document.getElementById('amountIn').value;
+            document.getElementById('amountOut').value = amountIn * 0.98; // Example calculation
+        }
+
+        function swapTokens() {
+            const tokenIn = document.getElementById('tokenIn');
+            const tokenOut = document.getElementById('tokenOut');
+            const amountIn = document.getElementById('amountIn');
+            const amountOut = document.getElementById('amountOut');
+
+            [tokenIn.value, tokenOut.value] = [tokenOut.value, tokenIn.value];
+            [amountIn.value, amountOut.value] = [amountOut.value, amountIn.value];
+        }
+
+        function searchToken(type) {
+            // Add your token search logic here
+            alert('Token search functionality coming soon!');
+        }
     </script>
 </body>
 </html>

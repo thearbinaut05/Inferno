@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agent Settings</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -25,14 +26,28 @@
                         <a href="index.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Dashboard</a>
                         <a href="swap.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Swap</a>
                         <a href="settings.html" class="text-blue-500 px-3 py-2 rounded-md">Settings</a>
+                        <a href="history.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">History</a>
                     </div>
+                </div>
+                <div class="flex items-center">
+                    <button id="connectWallet" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors">
+                        Connect Wallet
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
 
     <main class="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="bg-white rounded-lg shadow">
+        <div id="walletPrompt" class="bg-white rounded-lg shadow p-6 text-center hidden">
+            <i class="fas fa-wallet text-4xl text-gray-400 mb-4"></i>
+            <p class="text-gray-600">Please connect your wallet to manage agent settings</p>
+            <button onclick="connectWallet()" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition-colors">
+                Connect Wallet
+            </button>
+        </div>
+
+        <div id="settingsInterface" class="bg-white rounded-lg shadow">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-2xl font-bold text-gray-900">Agent Settings</h2>
                 <p class="mt-1 text-sm text-gray-500">Customize your flash swap agent parameters</p>
@@ -48,6 +63,7 @@
                         </span>
                     </label>
                     <input type="number" 
+                           id="fibonacciBase"
                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                            value="1">
                     <p class="text-sm text-gray-500">Base number for Fibonacci sequence calculations</p>
@@ -62,6 +78,7 @@
                         </span>
                     </label>
                     <input type="number" 
+                           id="exponentThreshold"
                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                            value="1">
                     <p class="text-sm text-gray-500">Threshold value for exponential calculations</p>
@@ -76,6 +93,7 @@
                         </span>
                     </label>
                     <input type="range" 
+                           id="riskFactor"
                            class="mt-1 block w-full"
                            min="1" 
                            max="10" 
@@ -95,6 +113,7 @@
                         </span>
                     </label>
                     <input type="number" 
+                           id="maxGasPrice"
                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                            value="50">
                     <p class="text-sm text-gray-500">Maximum gas price for executing transactions</p>
@@ -116,21 +135,89 @@
         Settings saved successfully!
     </div>
 
+    <script src="js/wallet.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const connectButton = document.getElementById('connectWallet');
+            const walletPrompt = document.getElementById('walletPrompt');
+            const settingsInterface = document.getElementById('settingsInterface');
             const settingsForm = document.getElementById('settingsForm');
             const notification = document.getElementById('notification');
             
-            settingsForm.addEventListener('submit', function(e) {
+            connectButton.addEventListener('click', connectWallet);
+            
+            // Check if wallet is already connected
+            if (!window.userWallet) {
+                walletPrompt.classList.remove('hidden');
+                settingsInterface.classList.add('hidden');
+            }
+
+            window.addEventListener('walletConnected', async function(e) {
+                walletPrompt.classList.add('hidden');
+                settingsInterface.classList.remove('hidden');
+                
+                // Load current settings
+                try {
+                    const contract = new ethers.Contract(
+                        'YOUR_CONTRACT_ADDRESS',
+                        [
+                            'function fibonacciBase() view returns (uint256)',
+                            'function exponentThreshold() view returns (uint256)',
+                            'function riskFactor() view returns (uint256)'
+                        ],
+                        window.userWallet.provider
+                    );
+
+                    const [base, threshold, risk] = await Promise.all([
+                        contract.fibonacciBase(),
+                        contract.exponentThreshold(),
+                        contract.riskFactor()
+                    ]);
+
+                    document.getElementById('fibonacciBase').value = base.toString();
+                    document.getElementById('exponentThreshold').value = threshold.toString();
+                    document.getElementById('riskFactor').value = risk.toString();
+                } catch (error) {
+                    console.error('Error loading settings:', error);
+                }
+            });
+
+            window.addEventListener('walletDisconnected', function() {
+                walletPrompt.classList.remove('hidden');
+                settingsInterface.classList.add('hidden');
+            });
+            
+            settingsForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
-                // Show notification
-                notification.classList.remove('hidden');
-                setTimeout(() => {
-                    notification.classList.add('hidden');
-                }, 3000);
-                
-                // Add your settings update logic here
+                if (!window.userWallet) {
+                    alert('Please connect your wallet first');
+                    return;
+                }
+
+                try {
+                    const contract = new ethers.Contract(
+                        'YOUR_CONTRACT_ADDRESS',
+                        ['function updateParameters(uint256,uint256,uint256)'],
+                        window.userWallet.signer
+                    );
+
+                    const base = document.getElementById('fibonacciBase').value;
+                    const threshold = document.getElementById('exponentThreshold').value;
+                    const risk = document.getElementById('riskFactor').value;
+
+                    const tx = await contract.updateParameters(base, threshold, risk);
+                    await tx.wait();
+
+                    // Show success notification
+                    notification.classList.remove('hidden');
+                    setTimeout(() => {
+                        notification.classList.add('hidden');
+                    }, 3000);
+                } catch (error) {
+                    console.error('Error saving settings:', error);
+                    alert('Failed to save settings: ' + error.message);
+                }
             });
         });
     </script>
