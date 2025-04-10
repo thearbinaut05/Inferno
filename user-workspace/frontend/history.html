@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transaction History</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -28,122 +29,115 @@
                         <a href="history.html" class="text-blue-500 px-3 py-2 rounded-md">History</a>
                     </div>
                 </div>
+                <div class="flex items-center">
+                    <button id="connectWallet" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors">
+                        Connect Wallet
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
 
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <!-- Filters -->
-        <div class="bg-white rounded-lg shadow mb-6 p-4">
-            <div class="flex flex-wrap gap-4 items-center">
-                <div class="flex-1">
-                    <input type="text" 
-                           placeholder="Search by transaction hash..." 
-                           class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div class="flex gap-4">
-                    <select class="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                        <option>All Types</option>
-                        <option>Flash Swaps</option>
-                        <option>Rebalances</option>
-                    </select>
-                    <select class="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                        <option>Last 24 hours</option>
-                        <option>Last 7 days</option>
-                        <option>Last 30 days</option>
-                        <option>All time</option>
-                    </select>
-                </div>
-            </div>
+        <div id="walletPrompt" class="bg-white rounded-lg shadow p-6 text-center hidden">
+            <i class="fas fa-wallet text-4xl text-gray-400 mb-4"></i>
+            <p class="text-gray-600">Please connect your wallet to view transaction history</p>
+            <button onclick="connectWallet()" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition-colors">
+                Connect Wallet
+            </button>
         </div>
 
-        <!-- Transaction List -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h2 class="text-lg font-medium text-gray-900">Transaction History</h2>
-            </div>
-            
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Transaction Hash
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Type
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Amount
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Time
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- Example Transaction -->
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
-                                0x1234...5678
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                Flash Swap
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                1.5 ETH
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    Success
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                2 minutes ago
-                            </td>
-                        </tr>
-                        <!-- Add more rows as needed -->
-                    </tbody>
-                </table>
+        <div id="historyInterface">
+            <!-- Filters -->
+            <div class="bg-white rounded-lg shadow mb-6 p-4">
+                <div class="flex flex-wrap gap-4 items-center">
+                    <div class="flex-1">
+                        <input type="text" 
+                               id="searchTx"
+                               placeholder="Search by transaction hash..." 
+                               class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="flex gap-4">
+                        <select id="txType" class="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option value="all">All Types</option>
+                            <option value="flash">Flash Swaps</option>
+                            <option value="rebalance">Rebalances</option>
+                        </select>
+                        <select id="timeRange" class="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option value="24h">Last 24 hours</option>
+                            <option value="7d">Last 7 days</option>
+                            <option value="30d">Last 30 days</option>
+                            <option value="all">All time</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
-            <!-- Pagination -->
-            <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex-1 flex justify-between sm:hidden">
-                        <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            Previous
-                        </a>
-                        <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            Next
-                        </a>
-                    </div>
-                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                        <div>
-                            <p class="text-sm text-gray-700">
-                                Showing <span class="font-medium">1</span> to <span class="font-medium">10</span> of <span class="font-medium">20</span> results
-                            </p>
+            <!-- Transaction List -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-medium text-gray-900">Transaction History</h2>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Transaction Hash
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Type
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Amount
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Time
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Transactions will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1 flex justify-between sm:hidden">
+                            <button onclick="previousPage()" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                Previous
+                            </button>
+                            <button onclick="nextPage()" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                Next
+                            </button>
                         </div>
-                        <div>
-                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                    <span class="sr-only">Previous</span>
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                                <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                    1
-                                </a>
-                                <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                    2
-                                </a>
-                                <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                    <span class="sr-only">Next</span>
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </nav>
+                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-sm text-gray-700">
+                                    Showing <span id="pageStart" class="font-medium">1</span> to <span id="pageEnd" class="font-medium">10</span> of <span id="totalItems" class="font-medium">0</span> results
+                                </p>
+                            </div>
+                            <div>
+                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                    <button onclick="previousPage()" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <span class="sr-only">Previous</span>
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <div id="pageNumbers" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                                        <!-- Page numbers will be inserted here -->
+                                    </div>
+                                    <button onclick="nextPage()" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <span class="sr-only">Next</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </nav>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -151,10 +145,196 @@
         </div>
     </main>
 
+    <script src="js/wallet.js"></script>
     <script>
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let transactions = [];
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Add your transaction history loading and filtering logic here
+            const connectButton = document.getElementById('connectWallet');
+            const walletPrompt = document.getElementById('walletPrompt');
+            const historyInterface = document.getElementById('historyInterface');
+            
+            connectButton.addEventListener('click', connectWallet);
+            
+            // Check if wallet is already connected
+            if (!window.userWallet) {
+                walletPrompt.classList.remove('hidden');
+                historyInterface.classList.add('hidden');
+            }
+
+            // Setup event listeners for filters
+            document.getElementById('searchTx').addEventListener('input', filterTransactions);
+            document.getElementById('txType').addEventListener('change', filterTransactions);
+            document.getElementById('timeRange').addEventListener('change', filterTransactions);
+
+            window.addEventListener('walletConnected', async function(e) {
+                walletPrompt.classList.add('hidden');
+                historyInterface.classList.remove('hidden');
+                await loadTransactions();
+            });
+
+            window.addEventListener('walletDisconnected', function() {
+                walletPrompt.classList.remove('hidden');
+                historyInterface.classList.add('hidden');
+                transactions = [];
+                updateTable();
+            });
         });
+
+        async function loadTransactions() {
+            try {
+                const contract = new ethers.Contract(
+                    'YOUR_CONTRACT_ADDRESS',
+                    ['event FlashSwapExecuted(address indexed tokenIn, address indexed tokenOut, uint256 amountIn, uint256 amountOut)'],
+                    window.userWallet.provider
+                );
+
+                // Get past events
+                const filter = contract.filters.FlashSwapExecuted();
+                const events = await contract.queryFilter(filter);
+
+                transactions = await Promise.all(events.map(async event => {
+                    const block = await event.getBlock();
+                    return {
+                        hash: event.transactionHash,
+                        type: 'Flash Swap',
+                        amount: ethers.utils.formatEther(event.args.amountIn),
+                        status: 'Success',
+                        timestamp: new Date(block.timestamp * 1000)
+                    };
+                }));
+
+                updateTable();
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+            }
+        }
+
+        function filterTransactions() {
+            const searchTerm = document.getElementById('searchTx').value.toLowerCase();
+            const type = document.getElementById('txType').value;
+            const timeRange = document.getElementById('timeRange').value;
+
+            const filtered = transactions.filter(tx => {
+                const matchesSearch = tx.hash.toLowerCase().includes(searchTerm);
+                const matchesType = type === 'all' || tx.type.toLowerCase().includes(type);
+                const matchesTime = timeRange === 'all' || isWithinTimeRange(tx.timestamp, timeRange);
+                return matchesSearch && matchesType && matchesTime;
+            });
+
+            updateTable(filtered);
+        }
+
+        function isWithinTimeRange(timestamp, range) {
+            const now = new Date();
+            const txDate = new Date(timestamp);
+            const diff = now - txDate;
+
+            switch (range) {
+                case '24h': return diff <= 86400000; // 24 hours in milliseconds
+                case '7d': return diff <= 604800000; // 7 days
+                case '30d': return diff <= 2592000000; // 30 days
+                default: return true;
+            }
+        }
+
+        function updateTable(filteredTx = transactions) {
+            const tbody = document.getElementById('transactionTableBody');
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const paginatedTx = filteredTx.slice(start, end);
+
+            tbody.innerHTML = paginatedTx.length ? paginatedTx.map(tx => `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+                        ${tx.hash.substring(0, 6)}...${tx.hash.substring(62)}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${tx.type}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${tx.amount} ETH
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            ${tx.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${timeAgo(tx.timestamp)}
+                    </td>
+                </tr>
+            `).join('') : `
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                        No transactions found
+                    </td>
+                </tr>
+            `;
+
+            updatePagination(filteredTx.length);
+        }
+
+        function updatePagination(totalItems) {
+            document.getElementById('pageStart').textContent = totalItems ? (currentPage - 1) * itemsPerPage + 1 : 0;
+            document.getElementById('pageEnd').textContent = Math.min(currentPage * itemsPerPage, totalItems);
+            document.getElementById('totalItems').textContent = totalItems;
+
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const pageNumbers = document.getElementById('pageNumbers');
+            pageNumbers.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.className = `relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium ${i === currentPage ? 'text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`;
+                button.textContent = i;
+                button.onclick = () => goToPage(i);
+                pageNumbers.appendChild(button);
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                filterTransactions();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(transactions.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                filterTransactions();
+            }
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            filterTransactions();
+        }
+
+        function timeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + ' years ago';
+            
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + ' months ago';
+            
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + ' days ago';
+            
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + ' hours ago';
+            
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + ' minutes ago';
+            
+            return Math.floor(seconds) + ' seconds ago';
+        }
     </script>
 </body>
 </html>
