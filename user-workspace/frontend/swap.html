@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Execute Flash Swap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="index.html" class="text-xl font-bold text-gray-800">Flash Swap</a>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="index.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Dashboard</a>
+                        <a href="swap.html" class="text-blue-500 px-3 py-2 rounded-md">Swap</a>
+                        <a href="settings.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Settings</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-2xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Execute Flash Swap</h2>
+            
+            <form id="swapForm" class="space-y-6">
+                <!-- Token Input -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Token In</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <input type="text" 
+                               class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-4 pr-12 sm:text-sm border-gray-300 rounded-md" 
+                               placeholder="Token Address">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Amount Input -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Amount In</label>
+                    <div class="mt-1">
+                        <input type="number" 
+                               class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-4 pr-12 sm:text-sm border-gray-300 rounded-md" 
+                               placeholder="0.0">
+                    </div>
+                </div>
+
+                <div class="flex justify-center">
+                    <button type="button" class="bg-gray-200 rounded-full p-2">
+                        <i class="fas fa-arrow-down text-gray-600"></i>
+                    </button>
+                </div>
+
+                <!-- Token Output -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Token Out</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <input type="text" 
+                               class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-4 pr-12 sm:text-sm border-gray-300 rounded-md" 
+                               placeholder="Token Address">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Amount Output -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Amount Out (Estimated)</label>
+                    <div class="mt-1">
+                        <input type="number" 
+                               class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-4 pr-12 sm:text-sm border-gray-300 rounded-md" 
+                               placeholder="0.0" 
+                               readonly>
+                    </div>
+                </div>
+
+                <!-- Execute Button -->
+                <div>
+                    <button type="submit" 
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Execute Flash Swap
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Transaction Status Modal -->
+    <div id="statusModal" class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                Transaction Status
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">
+                                    Processing your flash swap transaction...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const swapForm = document.getElementById('swapForm');
+            
+            swapForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                // Add your swap execution logic here
+                document.getElementById('statusModal').classList.remove('hidden');
+            });
+        });
+    </script>
+</body>
+</html>

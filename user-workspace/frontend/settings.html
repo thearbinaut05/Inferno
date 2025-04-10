@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="index.html" class="text-xl font-bold text-gray-800">Flash Swap</a>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="index.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Dashboard</a>
+                        <a href="swap.html" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Swap</a>
+                        <a href="settings.html" class="text-blue-500 px-3 py-2 rounded-md">Settings</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-900">Agent Settings</h2>
+                <p class="mt-1 text-sm text-gray-500">Customize your flash swap agent parameters</p>
+            </div>
+
+            <form id="settingsForm" class="p-6 space-y-6">
+                <!-- Fibonacci Base -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Fibonacci Base
+                        <span class="ml-1 text-xs text-gray-500" title="Base number for Fibonacci sequence calculations">
+                            <i class="fas fa-info-circle"></i>
+                        </span>
+                    </label>
+                    <input type="number" 
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                           value="1">
+                    <p class="text-sm text-gray-500">Base number for Fibonacci sequence calculations</p>
+                </div>
+
+                <!-- Exponent Threshold -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Exponent Threshold
+                        <span class="ml-1 text-xs text-gray-500" title="Threshold for exponential calculations">
+                            <i class="fas fa-info-circle"></i>
+                        </span>
+                    </label>
+                    <input type="number" 
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                           value="1">
+                    <p class="text-sm text-gray-500">Threshold value for exponential calculations</p>
+                </div>
+
+                <!-- Risk Factor -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Risk Factor
+                        <span class="ml-1 text-xs text-gray-500" title="Risk tolerance level for trades">
+                            <i class="fas fa-info-circle"></i>
+                        </span>
+                    </label>
+                    <input type="range" 
+                           class="mt-1 block w-full"
+                           min="1" 
+                           max="10" 
+                           value="5">
+                    <div class="flex justify-between text-xs text-gray-500">
+                        <span>Conservative</span>
+                        <span>Aggressive</span>
+                    </div>
+                </div>
+
+                <!-- Gas Price Threshold -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Maximum Gas Price (Gwei)
+                        <span class="ml-1 text-xs text-gray-500" title="Maximum gas price for transactions">
+                            <i class="fas fa-info-circle"></i>
+                        </span>
+                    </label>
+                    <input type="number" 
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                           value="50">
+                    <p class="text-sm text-gray-500">Maximum gas price for executing transactions</p>
+                </div>
+
+                <!-- Save Button -->
+                <div class="pt-4">
+                    <button type="submit" 
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Save Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Success Notification -->
+    <div id="notification" class="hidden fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+        Settings saved successfully!
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const settingsForm = document.getElementById('settingsForm');
+            const notification = document.getElementById('notification');
+            
+            settingsForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show notification
+                notification.classList.remove('hidden');
+                setTimeout(() => {
+                    notification.classList.add('hidden');
+                }, 3000);
+                
+                // Add your settings update logic here
+            });
+        });
+    </script>
+</body>
+</html>
