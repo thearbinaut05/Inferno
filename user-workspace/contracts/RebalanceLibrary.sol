@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.20;
 
 library RebalanceLibrary {
     function fibonacci(uint256 n) internal pure returns (uint256) {

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -10,7 +10,12 @@ contract AgentCustomization is Ownable {
 
     event ParametersUpdated(uint256 fibonacciBase, uint256 exponentThreshold, uint256 riskFactor);
 
-    constructor(uint256 _fibonacciBase, uint256 _exponentThreshold, uint256 _riskFactor) {
+    constructor(
+        address initialOwner,
+        uint256 _fibonacciBase,
+        uint256 _exponentThreshold,
+        uint256 _riskFactor
+    ) Ownable(initialOwner) {
         fibonacciBase = _fibonacciBase;
         exponentThreshold = _exponentThreshold;
         riskFactor = _riskFactor;
