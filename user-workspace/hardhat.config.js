@@ -1,7 +1,4 @@
 require("@nomicfoundation/hardhat-toolbox");
-require("@nomicfoundation/hardhat-chai-matchers");
-require("@nomicfoundation/hardhat-ethers");
-require("@nomicfoundation/hardhat-ignition");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
 
@@ -48,7 +45,8 @@ module.exports = {
       url: POLYGON_MUMBAI_URL,
       chainId: 80001,
       gasPrice: "auto",
-      gasMultiplier: 1.2
+      gasMultiplier: 1.2,
+      accounts: ['0x1234567890123456789012345678901234567890123456789012345678901234'] // Temporary private key for testing
     },
     polygon: {
       url: POLYGON_MAINNET_URL,
