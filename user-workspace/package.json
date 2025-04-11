@@ -61,6 +61,7 @@
     "at-least-node": "^1.0.0",
     "aws-sign2": "^0.7.0",
     "aws4": "^1.13.2",
+    "axios": "^1.8.4",
     "balanced-match": "^1.0.2",
     "base-x": "^3.0.11",
     "base64-js": "^1.5.1",
