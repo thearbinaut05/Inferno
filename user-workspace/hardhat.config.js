@@ -4,10 +4,9 @@ require("@nomicfoundation/hardhat-ethers");
 require("@nomicfoundation/hardhat-ignition");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
-require("dotenv").config();
 
 const INFURA_API_URL = "https://mainnet.infura.io/v3/fe2c057b95cc46669a701a31ab7fcc1f";
-const PRIVATE_KEY = "0xdfd7089febbacf7ba0bc227dafffa9fc08a93fd68e424f1cef23656c";
+const GAS_API_URL = "https://gas.api.infura.io/v3/fe2c057b95cc46669a701a31ab7fcc1f";
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -22,7 +21,11 @@ module.exports = {
   },
   networks: {
     hardhat: {
-      chainId: 1337
+      chainId: 1337,
+      forking: {
+        url: INFURA_API_URL,
+        enabled: true
+      }
     },
     localhost: {
       url: "http://127.0.0.1:8545",
@@ -30,7 +33,13 @@ module.exports = {
     },
     mainnet: {
       url: INFURA_API_URL,
-      accounts: [PRIVATE_KEY],
+      gasReporter: {
+        enabled: true,
+        gasPrice: {
+          url: GAS_API_URL,
+          token: 'ETH'
+        }
+      },
       chainId: 1
     }
   },
