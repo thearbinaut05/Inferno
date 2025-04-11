@@ -1,8 +1,8 @@
 # AtomicFlashSwap V2
 
-An enhanced implementation of flash loan-powered atomic swaps using Aave V3 protocol.
+An enhanced implementation of flash loan-powered atomic swaps using Aave V3 protocol, with advanced gas optimization and deployment features.
 
-## Features
+## Core Features
 
 - **Security Enhancements**
   - Reentrancy protection
@@ -22,10 +22,31 @@ An enhanced implementation of flash loan-powered atomic swaps using Aave V3 prot
   - Configurable slippage tolerance
   - Improved error handling
 
+## Gas Optimization Features
+
+- **Dynamic Gas Price Estimation**
+  - Real-time gas price fetching from Polygon Gas Station
+  - Multiple priority levels (safe, standard, fast)
+  - Configurable safety margins
+  - Fallback mechanisms for reliable operation
+
+- **Deployment Cost Estimation**
+  - Accurate deployment cost prediction
+  - Token whitelisting cost calculation
+  - Method-specific gas estimation
+  - Batch operation optimization
+
+- **Smart Contract Optimization**
+  - Custom errors for gas efficiency
+  - Optimized storage patterns
+  - Efficient approval mechanisms
+  - Gas-conscious state updates
+
 ## Installation
 
 ```bash
 npm install
+npm install web3 node-fetch # Required for gas estimation features
 ```
 
 ## Configuration
@@ -39,7 +60,12 @@ MUMBAI_RPC_URL=your_mumbai_rpc_url
 
 2. Configure network settings in `hardhat.config.js`
 
-## Testing
+## Gas Estimation & Testing
+
+Test gas estimation features:
+```bash
+npx hardhat run scripts/testGasEstimation.js --network mumbai
+```
 
 Run the test suite:
 ```bash
@@ -53,19 +79,35 @@ npx hardhat test test/AtomicFlashSwapV2.test.js
 
 ## Deployment
 
-1. Test deployment (Mumbai):
+### Deployment Process
+
+1. Pre-deployment Checks
 ```bash
+# Test deployment and estimate costs
 npx hardhat run scripts/testDeploymentV2.js --network mumbai
+
+# Run gas estimation tests
+npx hardhat run scripts/testGasEstimation.js --network mumbai
 ```
 
-2. Deploy contract:
+2. Deploy Contract
 ```bash
+# Deploy with standard settings
 npx hardhat run scripts/deployWithFlashLoanV2.js --network polygon
+
+# Deploy with gas optimization
+npx hardhat run scripts/deployWithGasEstimation.js --network polygon
 ```
 
 ## Usage
 
-1. Execute flash swap:
+### Gas-Optimized Deployment
+```bash
+# Deploy with gas optimization
+npx hardhat run scripts/deployWithGasEstimation.js --network polygon
+```
+
+### Execute Flash Swap
 ```javascript
 const { executeFlashSwap } = require('./scripts/executeFlashSwapV2');
 
@@ -79,7 +121,46 @@ await executeFlashSwap(
 );
 ```
 
-## Contract Addresses
+### Gas Estimation Utilities
+```javascript
+const { 
+    getOptimalGasPrice,
+    estimateDeploymentGas,
+    estimateMethodGas,
+    suggestBatchSize
+} = require('./scripts/gasHelper');
+
+// Get optimal gas price
+const gasPrice = await getOptimalGasPrice({
+    priority: 'fast',
+    margin: 20 // 20% safety margin
+});
+
+// Estimate deployment costs
+const estimation = await estimateDeploymentGas(
+    ContractFactory,
+    constructorArgs,
+    { margin: 20 }
+);
+
+// Estimate method gas
+const methodGas = await estimateMethodGas(
+    contract,
+    'methodName',
+    methodArgs,
+    { margin: 20 }
+);
+
+// Get batch size recommendations
+const batchInfo = await suggestBatchSize(
+    contract,
+    'methodName',
+    items,
+    { maxGasPerBlock: 30000000 }
+);
+```
+
+## Network Addresses
 
 ### Polygon Mainnet
 - AAVE Pool: `0x794a61358D6845594F94dc1DB02A252b5b4814aD`
