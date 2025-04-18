@@ -3,81 +3,81 @@ from fastapi.responses import JSONResponse
 import stripe
 import os
 from dotenv import load_dotenv
-import json
 import asyncio
 from datetime import datetime
+import json
+
+from .wallet import WalletManager
+from .stripe_manager import StripeManager
+from .agent_coordinator import AgentCoordinator
+from ..utils.logger import setup_logger
 
 # Load environment variables
 load_dotenv()
 
-# Initialize Stripe
-stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
-webhook_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
+# Initialize FastAPI app
+app = FastAPI(title="Blackbox Swarm Prime")
 
-app = FastAPI()
+# Initialize components
+wallet_manager = WalletManager()
+stripe_manager = StripeManager()
+agent_coordinator = AgentCoordinator(wallet_manager)
 
-# Store user wallets in memory (replace with DB in production)
-wallets = {}
+# Setup logging
+logger = setup_logger("main_app")
 
-class SwarmAgent:
-    def __init__(self, user_id):
-        self.user_id = user_id
-        self.balance = 0
-        self.tasks_completed = 0
-        self.last_active = datetime.now()
-    
-    async def run(self):
-        while True:
-            try:
-                # Simulate work and earnings
-                await asyncio.sleep(5)  # 5 second work cycle
-                earned = 0.10  # $0.10 per task
-                
-                # Update balances
-                wallets[self.user_id]["balance"] += earned * 0.9  # 90% to user
-                wallets[self.user_id]["platform_fee"] += earned * 0.1  # 10% to platform
-                
-                self.tasks_completed += 1
-                self.last_active = datetime.now()
-                
-                # Auto-reinvest if balance > $50
-                if wallets[self.user_id]["balance"] > 50:
-                    await self.reinvest()
-                    
-            except Exception as e:
-                print(f"Agent error: {e}")
-                await asyncio.sleep(1)
-                
-    async def reinvest(self):
-        """Simulate AI trading with user's idle balance"""
-        invest_amount = wallets[self.user_id]["balance"] * 0.8
-        wallets[self.user_id]["invested"] += invest_amount
-        wallets[self.user_id]["balance"] -= invest_amount
+@app.on_event("startup")
+async def startup_event():
+    """Initialize system on startup"""
+    try:
+        # Load existing wallets
+        wallet_manager.load_from_file()
+        
+        # Initialize agents with platform wallet
+        platform_wallet = wallet_manager.get_wallet("platform")
+        if platform_wallet:
+            initial_capital = platform_wallet.get("balance", 10000)
+            await agent_coordinator.initialize_agents(initial_capital)
+            
+            # Start agent coordinator
+            asyncio.create_task(agent_coordinator.start_all_agents())
+            logger.info("Agent coordinator started successfully")
+            
+    except Exception as e:
+        logger.error(f"Startup error: {e}")
+        raise
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on shutdown"""
+    try:
+        await agent_coordinator.stop_all_agents()
+        wallet_manager.save_to_file()
+        logger.info("System shutdown completed")
+    except Exception as e:
+        logger.error(f"Shutdown error: {e}")
 
 @app.post("/webhook")
 async def stripe_webhook(request: Request):
-    payload = await request.body()
-    sig_header = request.headers.get("stripe-signature")
-    
+    """Handle Stripe webhook events"""
     try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, webhook_secret
-        )
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        payload = await request.body()
+        sig_header = request.headers.get("stripe-signature")
         
-    if event.type == "checkout.session.completed":
-        session = event.data.object
-        user_id = session.client_reference_id
+        # Process webhook
+        result = await stripe_manager.handle_webhook(payload, sig_header)
         
-        # Create virtual card for user
-        card = stripe.issuing.Card.create(
-            cardholder=user_id,
-            currency="usd",
-            type="virtual",
-        )
-        
-        # Initialize user wallet if needed
+        if result.get("type") == "checkout.session.completed":
+            session = result["data"]["object"]
+            user_id = session["client_reference_id"]
+            
+            # Create virtual card
+            card = await stripe_manager.create_virtual_card(
+                user_id,
+                session["customer"]
+            )
+            
+            # Initialize user wallet with signup bonus
         if user_id not in wallets:
             wallets[user_id] = {
                 "balance": 25.00,  # $25 signup bonus
