@@ -1,37 +1,68 @@
-<<<<<<< HEAD
 # Blackbox Swarm Prime
 
-An advanced self-replicating agent swarm system with Stripe integration, virtual card issuance, and AI-driven trading capabilities.
+An advanced multi-agent system for automated revenue generation through DeFi protocols, flash loans, MEV opportunities, and yield farming. Features Stripe integration for virtual card issuance and automated profit distribution.
 
-## Features
+## Revenue Generation Methods
 
-- **Agent Swarm System**
-  - Self-replicating agents
-  - Parallel task execution
-  - Automatic scaling based on performance
-  - Revenue sharing (90% user / 10% platform)
+### 1. Flash Loan Arbitrage
+- Automated detection of price discrepancies across DEXes
+- Flash loan execution for zero-capital arbitrage
+- Risk management with minimum profit thresholds
+- Multi-DEX support (Uniswap, SushiSwap, QuickSwap, etc.)
 
-- **Stripe Integration**
-  - Virtual card issuance
-  - Automated payment processing
-  - Webhook handling
-  - Secure transaction management
+### 2. Yield Farming
+- Automated yield farming across multiple protocols
+- Dynamic reallocation based on APY
+- Risk-adjusted returns optimization
+- Supported protocols: Aave, Compound, Curve
 
-- **AI Trading Engine**
-  - Automated market analysis
-  - Real-time cryptocurrency price tracking
-  - Risk-managed trading strategies
-  - Profit reinvestment system
+### 3. MEV Extraction
+- Sandwich attack opportunities
+- Frontrunning protection
+- Mempool monitoring
+- Gas optimization for MEV extraction
 
-- **Wallet Management**
-  - User balance tracking
-  - Transaction history
-  - Investment pool management
-  - Automated fee collection
+### 4. Virtual Card System
+- Automated virtual card issuance via Stripe
+- Transaction monitoring and limits
+- Instant profit distribution
+- Integrated wallet management
+
+## System Architecture
+
+```
+blackbox-swarm-prime/
+├── agents/                 # Revenue-generating agents
+│   ├── FlashLoanAgent.py  # Flash loan arbitrage
+│   ├── YieldFarmingAgent.py  # Yield farming
+│   └── MEVAgent.py        # MEV extraction
+├── core/                  # Core system components
+│   ├── main.py           # FastAPI application
+│   ├── agent_coordinator.py  # Agent management
+│   ├── wallet.py         # Wallet operations
+│   ├── trader.py         # Trading logic
+│   └── stripe_manager.py # Payment processing
+└── scripts/              # Deployment scripts
+```
+
+## Performance Metrics
+
+- Target growth rate: 7.923x per hour
+- Profit distribution: 90% user / 10% platform
+- Minimum profit thresholds:
+  - Flash Loans: 0.5%
+  - Yield Farming: 15% APY
+  - MEV: 0.3% per transaction
 
 ## Installation
 
-### On Termux
+### Prerequisites
+- Python 3.8+
+- Stripe account with API keys
+- Node.js 14+ (for Web3 integration)
+- Termux (for Android deployment)
+
+### Setup
 
 1. Clone the repository:
 ```bash
@@ -39,101 +70,89 @@ git clone https://github.com/yourusername/blackbox-swarm-prime.git
 cd blackbox-swarm-prime
 ```
 
-2. Run the installation script:
+2. Install dependencies:
 ```bash
-chmod +x swarm/scripts/install.sh
-./swarm/scripts/install.sh
+chmod +x scripts/install.sh
+./scripts/install.sh
 ```
 
-3. Start the system:
+3. Configure environment variables:
 ```bash
-chmod +x swarm/scripts/start.sh
-./swarm/scripts/start.sh
+cp .env.example .env
+# Edit .env with your Stripe API keys
 ```
 
-### System Requirements
-
-- Python 3.8+
-- Termux (for Android deployment)
-- Active internet connection
-- Stripe account with API keys
-
-## Configuration
-
-1. Update your Stripe API keys in `~/.swarm/.env`:
-```env
-STRIPE_SECRET_KEY=your_secret_key
-STRIPE_PUBLISHABLE_KEY=your_publishable_key
-STRIPE_WEBHOOK_SECRET=your_webhook_secret
+4. Start the system:
+```bash
+chmod +x scripts/start.sh
+./scripts/start.sh
 ```
-
-2. Configure webhook URL in Stripe dashboard:
-- Use the ngrok URL provided during startup
-- Add `/webhook` endpoint to the URL
-- Enable relevant webhook events
-
-## Architecture
-
-### Core Components
-
-1. **Main API (`core/main.py`)**
-   - FastAPI server
-   - Route handling
-   - Agent coordination
-
-2. **Wallet System (`core/wallet.py`)**
-   - Balance management
-   - Transaction tracking
-   - Investment pooling
-
-3. **Trading Engine (`core/trader.py`)**
-   - Market analysis
-   - Trade execution
-   - Profit distribution
-
-4. **Stripe Manager (`core/stripe_manager.py`)**
-   - Payment processing
-   - Virtual card management
-   - Webhook handling
 
 ## API Endpoints
 
+### Stripe Integration
 - `POST /connect` - Start Stripe Connect onboarding
 - `POST /webhook` - Handle Stripe events
 - `GET /wallet/{user_id}` - Get wallet details
-- `POST /invest` - Start investment cycle
 
-## Growth Metrics
+### System Management
+- `GET /metrics` - System performance metrics
+- `POST /reinvest` - Trigger profit reinvestment
+- `GET /status` - System health check
 
-The system is designed for exponential growth:
-- Initial agent multiplication: 7.923x per hour
-- Revenue sharing: 90% user / 10% platform
-- Auto-reinvestment threshold: $50
-- Trading cycles: Every 4 hours
+## Monitoring & Management
 
-## Monitoring
-
-1. View logs:
+### Performance Dashboard
 ```bash
-screen -r swarm
+./scripts/monitor.sh
 ```
 
-2. Detach from logs:
-```
-Ctrl+A+D
-```
-
-3. Stop the system:
+### Agent Control
 ```bash
-screen -X -S swarm quit
+# Start all agents
+curl -X POST http://localhost:8000/agents/start
+
+# Stop all agents
+curl -X POST http://localhost:8000/agents/stop
+
+# Get agent status
+curl http://localhost:8000/status
 ```
 
-## Security
+## Security Features
 
-- All Stripe keys are stored securely in `.env`
-- Virtual cards are issued with strict spending limits
-- Trading engine includes risk management
-- All transactions are logged and monitored
+- Secure key management
+- Rate limiting
+- Transaction signing
+- Error handling and recovery
+- Automated backup systems
+
+## Revenue Optimization
+
+### Capital Allocation
+- Flash Loans: 30%
+- Yield Farming: 40%
+- MEV: 30%
+
+### Risk Management
+- Dynamic position sizing
+- Automated stop-loss
+- Profit taking thresholds
+- Risk-adjusted returns
+
+## Development
+
+### Running Tests
+```bash
+pytest tests/
+```
+
+### Code Style
+```bash
+black .
+flake8 .
+mypy .
+```
 
 ## Contributing
 
@@ -141,58 +160,26 @@ screen -X -S swarm quit
 2. Create your feature branch
 3. Commit your changes
 4. Push to the branch
-5. Create a new Pull Request
+5. Create a Pull Request
 
 ## License
 
 MIT License - see LICENSE file for details
 
+## Disclaimer
+
+This system involves real money and trading. Use at your own risk and ensure compliance with all relevant regulations and laws in your jurisdiction.
+
 ## Support
 
 For issues and feature requests, please create an issue in the repository.
 
-## Disclaimer
+## Acknowledgments
 
-This system involves real money and trading. Use at your own risk and ensure compliance with all relevant regulations and laws in your jurisdiction.
-=======
-# BlackBox Swarm Prime 🚀
+- FlixAI for video generation capabilities
+- CookieMonster.ai for session tracking
+- Various DeFi protocols for liquidity provision
 
-Autonomous agent swarm for AI-driven value generation with real-time financial tracking.
+---
 
-## Quick Start
-
-1. Clone:
-```bash
-git clone https://github.com/your-username/blackbox-swarm-prime.git
-cd blackbox-swarm-prime
-```
-
-2. Install:
-```bash
-bash scripts/install.sh
-```
-
-3. Configure:
-Edit `.env` with your Stripe keys
-
-4. Launch:
-```bash
-bash scripts/start.sh
-```
-
-## Monitor
-```bash
-bash scripts/monitor.sh
-```
-
-## Stop
-```bash
-bash scripts/stop.sh
-```
-
-## Safety
-⚠️ Read SAFETY.md before enabling live mode!
-
-## License
-MIT - Use responsibly
->>>>>>> 4f330f01e0a526c436ddb0eafebc08542a45a47f
+**Note**: This system is designed for educational purposes. Always perform due diligence before deploying financial systems in production.
