@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
+<<<<<<< HEAD
 echo "Starting Blackbox Swarm Prime..."
 
 # Load environment variables
@@ -55,3 +56,19 @@ echo "- Stripe: Connected and processing"
 echo "- Wallets: Initialized and tracking"
 echo ""
 echo "Monitor everything with 'screen -r swarm'"
+=======
+if [ ! -f ".env" ]; then
+    echo "❌ .env file not found. Copy from .env.example"
+    exit 1
+fi
+
+if [ ! -d "venv" ]; then
+    echo "❌ Virtual environment not found. Run install.sh first"
+    exit 1
+fi
+
+source venv/bin/activate
+
+echo "🚀 Launching BlackBox Swarm Prime..."
+python main.py
+>>>>>>> 4f330f01e0a526c436ddb0eafebc08542a45a47f

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 fastapi==0.68.1
 uvicorn==0.15.0
 stripe==2.63.0
@@ -7,3 +8,11 @@ pydantic==1.8.2
 python-multipart==0.0.5
 jinja2==3.0.1
 aiosqlite==0.17.0
+=======
+aiohttp==3.9.1
+asyncio==3.4.3
+python-dotenv==1.0.0
+stripe==7.0.0
+pytest==7.4.3
+pytest-asyncio==0.21.1
+>>>>>>> 4f330f01e0a526c436ddb0eafebc08542a45a47f

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Blackbox Swarm Prime
 
 An advanced self-replicating agent swarm system with Stripe integration, virtual card issuance, and AI-driven trading capabilities.
@@ -153,3 +154,45 @@ For issues and feature requests, please create an issue in the repository.
 ## Disclaimer
 
 This system involves real money and trading. Use at your own risk and ensure compliance with all relevant regulations and laws in your jurisdiction.
+=======
+# BlackBox Swarm Prime 🚀
+
+Autonomous agent swarm for AI-driven value generation with real-time financial tracking.
+
+## Quick Start
+
+1. Clone:
+```bash
+git clone https://github.com/your-username/blackbox-swarm-prime.git
+cd blackbox-swarm-prime
+```
+
+2. Install:
+```bash
+bash scripts/install.sh
+```
+
+3. Configure:
+Edit `.env` with your Stripe keys
+
+4. Launch:
+```bash
+bash scripts/start.sh
+```
+
+## Monitor
+```bash
+bash scripts/monitor.sh
+```
+
+## Stop
+```bash
+bash scripts/stop.sh
+```
+
+## Safety
+⚠️ Read SAFETY.md before enabling live mode!
+
+## License
+MIT - Use responsibly
+>>>>>>> 4f330f01e0a526c436ddb0eafebc08542a45a47f
