@@ -88,6 +88,45 @@ chmod +x scripts/start.sh
 ./scripts/start.sh
 ```
 
+## Wallet and Funds Management
+
+The system manages user funds using the WalletManager class, which persists wallet data to a file named `wallets.json` in the working directory.
+
+### Persisting Wallet Data
+
+- Wallet data is automatically saved to `wallets.json` after any update.
+- On system startup, wallet data is loaded from `wallets.json` to restore balances.
+
+### Checking Wallet Balances
+
+You can check wallet balances using the CLI script:
+
+```bash
+python3 scripts/show_balance.py <user_id>
+```
+
+Replace `<user_id>` with the user identifier.
+
+### Ensuring Data Persistence While Running
+
+To ensure wallet data is saved regularly while the system is running, run the periodic save script in parallel:
+
+```bash
+bash scripts/save_wallets_periodically.sh &
+```
+
+This script saves wallet data every 5 minutes.
+
+### Termux Setup Script
+
+For Termux users, a setup script `termux_setup.sh` is provided to automate pulling the latest code and creating necessary scripts.
+
+Run it with:
+
+```bash
+bash termux_setup.sh
+```
+
 ## API Endpoints
 
 ### Stripe Integration
