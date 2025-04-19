@@ -11,8 +11,7 @@ fi
 source venv/bin/activate
 
 echo "🚀 Launching BlackBox Swarm Prime..."
-python main.py
-
+python swarm/core/main.py
 =======
 if [ ! -f ".env" ]; then
     echo "❌ .env file not found. Copy from .env.example"
