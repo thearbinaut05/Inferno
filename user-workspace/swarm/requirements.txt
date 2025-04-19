@@ -20,7 +20,6 @@ eth-typing==2.2.2
 eth-utils==1.10.0
 
 # DeFi Integration
-aave-protocol-py==0.3.0
 uniswap-python==0.5.1
 
 # Performance & Monitoring
