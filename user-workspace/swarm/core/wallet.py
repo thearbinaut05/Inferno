@@ -5,6 +5,7 @@ import json
 class WalletManager:
     def __init__(self):
         self.wallets = {}
+        self.load_from_file()
         
     def create_wallet(self, user_id: str, initial_balance: float = 25.0):
         """Create a new wallet with optional signup bonus"""
@@ -19,6 +20,7 @@ class WalletManager:
             "created_at": datetime.now().isoformat(),
             "last_active": datetime.now().isoformat()
         }
+        self.save_to_file()
         return self.wallets[user_id]
         
     def add_funds(self, user_id: str, amount: float):
@@ -32,6 +34,7 @@ class WalletManager:
             "amount": amount,
             "timestamp": datetime.now().isoformat()
         })
+        self.save_to_file()
         
     def deduct_funds(self, user_id: str, amount: float):
         """Remove funds from user wallet"""
@@ -47,6 +50,7 @@ class WalletManager:
             "amount": amount,
             "timestamp": datetime.now().isoformat()
         })
+        self.save_to_file()
         
     def get_balance(self, user_id: str):
         """Get current wallet balance"""
@@ -69,11 +73,12 @@ class WalletManager:
                 "amount": invest_amount,
                 "timestamp": datetime.now().isoformat()
             })
+        self.save_to_file()
             
     def save_to_file(self):
         """Persist wallet data to file"""
         with open("wallets.json", "w") as f:
-            json.dump(self.wallets, f)
+            json.dump(self.wallets, f, indent=2)
             
     def load_from_file(self):
         """Load wallet data from file"""
