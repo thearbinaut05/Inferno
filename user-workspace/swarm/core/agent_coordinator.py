@@ -11,7 +11,9 @@ from .wallet import WalletManager
 from .trader import AITrader
 from ..utils.logger import setup_logger
 
-logger = setup_logger("agent_coordinator")
+from swarm.utils.logger import get_logger
+
+logger = get_logger("agent_coordinator")
 
 class AgentCoordinator:
     """Coordinates multiple revenue-generating agents for maximum returns"""

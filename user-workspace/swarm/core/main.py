@@ -25,7 +25,9 @@ stripe_manager = StripeManager()
 agent_coordinator = AgentCoordinator(wallet_manager)
 
 # Setup logging
-logger = setup_logger("main")
+from swarm.utils.logger import get_logger
+
+logger = get_logger("main")
 
 @app.on_event("startup")
 async def startup_event():
