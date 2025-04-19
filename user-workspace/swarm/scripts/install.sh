@@ -26,7 +26,7 @@ echo "Run 'bash scripts/start.sh' to begin"
 echo "🔥 Installing BlackBox Swarm Prime..."
 
 apt update && apt upgrade -y
-apt install python python-dev openssl-dev git -y
+apt install python python-dev openssl git -y
 
 python -m venv venv
 source venv/bin/activate
