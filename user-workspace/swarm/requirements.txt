@@ -46,7 +46,7 @@ isort==5.9.3
 # Additional Utils
 pydantic==1.8.2
 python-multipart==0.0.5
-requests==2.26.0
+requests==2.32.4
 aiofiles==0.7.0
 tenacity==8.0.1
 schedule==1.1.0
